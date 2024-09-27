@@ -91,22 +91,22 @@
                 <fieldset class="input_container">
                     <legend>Phone Number</legend>
                     <i class="fa-solid fa-phone-volume"></i>
-                    <input type="text" name="phone" id="phone" placeholder="Enter phone number" />
+                    <input type="text" name="phone" id="phone" oninput="hideText()" placeholder="Enter phone number" />
                 </fieldset>
                 <fieldset class="input_container">
                     <legend>Email</legend>
                     <i class="fa-solid fa-envelope"></i>
-                    <input type="email" name="updated_email" id="email" placeholder="Email Address" />
+                    <input type="email" name="updated_email" id="email" oninput="hideText()" placeholder="Email Address" />
                 </fieldset>
                 <fieldset class="input_container">
                     <legend>Last Donation Date</legend>
                     <i class="fa-solid fa-calendar-days"></i>
-                    <input type="date" name="lastDate" id="lastDate" placeholder="Phone Number" />
+                    <input type="date" name="lastDate" id="lastDate" oninput="hideText()" placeholder="Phone Number" />
                 </fieldset>
                 <fieldset class="input_container">
                     <legend>District</legend>
                     <i class="fa-solid fa-location-dot"></i>
-                    <select id="district" name="district">
+                    <select id="district" name="district" oninput="hideText()">
                         <option value="">Select District</option>
                         <option value="bagerhat">Bagerhat</option>
                         <option value="bandarban">Bandarban</option>
@@ -179,7 +179,7 @@
                 <fieldset class="input_container">
                     <legend>Police Station</legend>
                     <i class="fa-solid fa-location-dot"></i>
-                    <select id="policeStation" name="policeStation">
+                    <select id="policeStation" name="policeStation" oninput="hideText()">
                         <option value="">Select Police Station</option>
                     </select>
                 </fieldset>
@@ -267,6 +267,20 @@
         document.getElementById('output').innerText = phoneNumber;
         document.getElementById('send_phone').value = phoneNumber;
         document.getElementById('phoneNumber').value = phoneNumber;
+        function hideText() {
+            
+            var inputField_phone = document.getElementById("phone").value;
+            var inputField_email = document.getElementById("email").value;
+            var inputField_lastDate = document.getElementById("lastDate").value;
+            var inputField_district = document.getElementById("district").value;
+            var inputField_policeStation = document.getElementById("policeStation").value;
+            var textToHide = document.getElementById("textToHide");
+
+            if (inputField_phone.length > 0 || inputField_email.length > 0 ||inputField_lastDate.length > 0
+            || inputField_district.length > 0 || inputField_policeStation.length >0 ) {
+                textToHide.style.display = "none"; // Hide the text
+            }
+        }
     </script>
     
 </body>
