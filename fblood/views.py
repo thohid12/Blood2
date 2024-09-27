@@ -216,12 +216,16 @@ def update(request):
         updated_phone=request.POST["phone"]
         updated_mail=request.POST["updated_email"]
         
-        if(Donar_donate_info.objects.filter(phone=updated_phone).exists()==True or 
-           User.objects.filter(username=updated_phone).exists()==True or 
-           PreviousInfo.objects.filter(phone=updated_phone).exists()==True or
-           User.objects.filter(email=updated_mail).exists()==True ):
+        if(len(updated_phone)>0):    
+            if(Donar_donate_info.objects.filter(phone=updated_phone).exists()==True or 
+               User.objects.filter(username=updated_phone).exists()==True or 
+               PreviousInfo.objects.filter(phone=updated_phone).exists()==True ):
                 messages.error(request,"Your updated phone or email already exist in other account")
                 return redirect('update')
+        elif(len(updated_mail)>0):
+            if(User.objects.filter(email=updated_mail).exists()==True ):
+               messages.error(request,"Your updated phone or email already exist in other account")
+               return redirect('update')
         
         
         
