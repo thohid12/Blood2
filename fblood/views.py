@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,HttpResponse
 
-from  .models import Donar_signup_info,signup_info,Donar_donate_info,FindInfo,PreviousInfo,ProfileInfo
+from  .models import signup_info,Donar_donate_info,FindInfo,PreviousInfo,ProfileInfo
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from django.urls import reverse
@@ -14,6 +14,17 @@ from django.contrib import  messages
 import os
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate,login,logout
+from cloudinary.uploader import upload  # For Cloudinary upload
+
+
+#otp
+import random
+from django.core.mail import send_mail
+from django.utils import timezone
+from .models import OTP
+
+
+
 
 
 
@@ -103,7 +114,14 @@ def donate(request):
             
             
             else:
-                info = Donar_donate_info(name=name,phone=phone,blood=blood,date=date,district=district,police=police,img=uploaded_file)
+                # Upload the image to Cloudinary
+                cloudinary_response = upload(uploaded_file)
+            
+                # Get the secure URL of the uploaded image
+                image_url = cloudinary_response.get('secure_url')
+                print(image_url)
+                info = Donar_donate_info(name=name,phone=phone,blood=blood,date=date,district=district,
+                                         police=police,img=image_url)
                 info.save()
                 print("save")
                 messages.success(request,"All information have been submitted successfully")
@@ -216,6 +234,18 @@ def update(request):
         updated_phone=request.POST["phone"]
         updated_mail=request.POST["updated_email"]
         
+        
+        """ previous logic
+        if(Donar_donate_info.objects.filter(phone=updated_phone).exists()==True or 
+               User.objects.filter(username=updated_phone).exists()==True or 
+               PreviousInfo.objects.filter(phone=updated_phone).exists()==True or
+               User.objects.filter(email=updated_mail).exists()==True ):
+                messages.error(request,"Your updated phone or email already exist in other account")
+                return redirect('update') """
+        
+        
+        
+        
         if(len(updated_phone)>0):    
             if(Donar_donate_info.objects.filter(phone=updated_phone).exists()==True or 
                User.objects.filter(username=updated_phone).exists()==True or 
@@ -226,6 +256,7 @@ def update(request):
             if(User.objects.filter(email=updated_mail).exists()==True ):
                messages.error(request,"Your updated phone or email already exist in other account")
                return redirect('update')
+            
         
         
         
@@ -293,6 +324,86 @@ def update(request):
         return render(request,'update.html')
     
     
+#otp
+def generate_otp():
+    return str(random.randint(100000, 999999))
+
+def send_otp_email(user):
+    otp_code = generate_otp()
+    
+    # Save the OTP to the database
+    otp = OTP.objects.create(user=user, otp=otp_code)
+    
+    # Send email with the OTP
+    send_mail(
+        'Your OTP Code',
+        f'Your OTP code is {otp_code}. It is valid for 3 minutes.',
+        'c223075@ugrad.iiuc.ac.bd',  # Replace with your sender email
+        [user.email],
+        fail_silently=False,
+    )    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+def reset(request):
+    if request.method == "POST":
+        username=request.POST["phone"]
+        exists = User.objects.filter(username=username).exists()
+        email=request.POST["email"]
+        reset_password=request.POST["password"]
+        user = User.objects.get(username=username)
+        if (user.email==email and exists==True):
+            #set_password use for hash format(using this method the password save in hash format)
+            #user.password=reset_password (if we used this then the password store in plain text)
+            user.set_password(reset_password)
+            user.save()
+            #return redirect('Login') 
+            # Send OTP to the user’s email
+            send_otp_email(user)
+            # Redirect to the OTP verification page
+            return redirect('otp')
+        else:
+            messages.error(request,"Phone and email are not matching")
+            return redirect('reset')
+            
+    else:
+        return render(request,'reset.html')  
+   
+   
+def  otp(request):
+    if request.method == 'POST':
+        username=request.POST["phone"]
+        otp_input=request.POST["password"]
+        print(otp_input)
+        
+           
+        user = User.objects.get(username=username)  # Get the correct user
+
+            # Get the latest OTP for the user
+        otp = OTP.objects.filter(user=user).order_by('-created_at').first()
+
+        if otp and otp.otp ==otp_input:
+            if otp.is_valid():
+                # OTP is valid, process further
+                return redirect('Login')
+            else:
+                # OTP expired
+                messages.error(request,"OTP expired")
+                return redirect('reset')  # Start OTP process again
+        else:
+                # OTP expired
+                messages.error(request," Invalid OTP")
+                return redirect('otp')  # Start OTP process again
+    else:
+       return render(request, 'otp.html')  
+   
+ 
 def Logout(request):
     logout(request)
     return redirect('Login')
