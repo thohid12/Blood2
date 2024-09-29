@@ -88,7 +88,7 @@ WSGI_APPLICATION = 'Blood.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
+""" DATABASES = {
 'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'Final',
@@ -96,14 +96,14 @@ DATABASES = {
         'PASSWORD':'Amigada@2',
         'HOST':'localhost'
     }
-}
+} """
 
-""" extra database
+#extra database
 env = environ.Env()
 environ.Env.read_env()
 DATABASES = {
     'default': dj_database_url.parse(env('DATABASE_URL'))
-} """
+}
 
 
 # Password validation
