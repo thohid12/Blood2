@@ -11,6 +11,14 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
+
+
+
 #extra start
 import dj_database_url
 import environ
@@ -29,7 +37,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-a#a)k)d%i+u)lyk4@_1d@%hqurd+znot0d#s0+s931-uysn8c9'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -48,7 +56,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -81,7 +88,7 @@ WSGI_APPLICATION = 'Blood.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-""" DATABASES = {
+DATABASES = {
 'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'Final',
@@ -89,14 +96,14 @@ WSGI_APPLICATION = 'Blood.wsgi.application'
         'PASSWORD':'Amigada@2',
         'HOST':'localhost'
     }
-} """
+}
 
-#extra database
+""" extra database
 env = environ.Env()
 environ.Env.read_env()
 DATABASES = {
     'default': dj_database_url.parse(env('DATABASE_URL'))
-}
+} """
 
 
 # Password validation
@@ -133,18 +140,48 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = 'static/'
 STATICFILES_DIRS=[
     os.path.join(BASE_DIR,'static')
 ]
 STATIC_ROOT=os.path.join(BASE_DIR,'assets')
-# Configuration for WhiteNoise
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+""" These settings are required only if you're storing files locally on your server or using some other 
+#file storage solution (like Amazon S3, etc.). """
+
+# Cloudinary settings
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dgcepo2zw',
+    'API_KEY': '464777624834139',
+    'API_SECRET': '3lRrRFiVOUwmHCXtkcojZsHT_R4',
+}
+# Apply Cloudinary configuration
+cloudinary.config(
+    cloud_name=CLOUDINARY_STORAGE['CLOUD_NAME'],
+    api_key=CLOUDINARY_STORAGE['API_KEY'],
+    api_secret=CLOUDINARY_STORAGE['API_SECRET']
+)
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+
+
+
+
+
 MEDIA_URL='/media/'
-MEDIA_ROOT=os.path.join(BASE_DIR,'media/')
+MEDIA_ROOT=os.path.join(BASE_DIR,'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# for mail (code start here)
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # or your email service provider
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'c223075@ugrad.iiuc.ac.bd'  # Your sender email
+EMAIL_HOST_PASSWORD = 'uvgz ldfr pqmf sogc'  # Replace with the actual password of your sender email
+# for mail (code end here)
 
